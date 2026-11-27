@@ -137,7 +137,7 @@ def despues_de_la_peticion(respuesta):
 
     respuesta.headers["X-Content-Type-Options"] = "nosniff"
     respuesta.headers["X-Frame-Options"] = "DENY"
-    respuesta.headers["Content-Security-Policy"] = "default-src 'self'"    
+    respuesta.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
     return respuesta
 
 
