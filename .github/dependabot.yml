@@ -1,0 +1,11 @@
+﻿# Dependabot: revisa semanalmente las dependencias pip del repositorio.
+# La raíz del repo ("/") contiene requirements.txt y requirements-dev.txt.
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "VULN-DEP"
