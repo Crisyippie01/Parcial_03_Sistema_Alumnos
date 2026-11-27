@@ -50,7 +50,20 @@ pipeline {
         }
 
         // >>> [SEGURIDAD]: aquí van las etapas "Security Review (SAST)" y "Dependency Management"
+        stage('Security Review (SAST)') {
+            steps {
+                sh '.venv/bin/pip install bandit'
+                sh '.venv/bin/bandit -f json -o reports/bandit.json app.py'
+                sh '.venv/bin/bandit -o reports/bandit.txt app.py'
+            }
+        }
 
+        stage('Dependency Management (SCA)') {
+            steps {
+                sh '.venv/bin/pip install pip-audit'
+                sh '.venv/bin/pip-audit -r requirements.txt -f json -o reports/pip-audit.json'
+            }
+        }
         // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
 
         stage('Deploy Producción') {
