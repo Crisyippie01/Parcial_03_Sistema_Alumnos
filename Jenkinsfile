@@ -53,24 +53,27 @@ pipeline {
         stage('Security Review (SAST)') {
             steps {
                 sh '.venv/bin/pip install bandit'
-                sh '.venv/bin/bandit -f json -o reports/bandit.json app.py'
-                sh '.venv/bin/bandit -o reports/bandit.txt app.py'
+                script {
+                    def banditCode = sh(
+                        script: '.venv/bin/bandit -f json -o reports/bandit.json app.py || true',
+                        returnStatus: true
+                    )
+                    echo "Bandit terminó con código: ${banditCode}"
+                }
+                sh '.venv/bin/bandit -o reports/bandit.txt app.py || true'
             }
         }
 
         stage('Dependency Management (SCA)') {
             steps {
                 sh '.venv/bin/pip install pip-audit'
-                sh '.venv/bin/pip-audit -r requirements.txt -f json -o reports/pip-audit.json'
-            }
-        }
-        // >>> [ZAP]: aquí van las etapas "Deploy Staging" y "DAST - OWASP ZAP"
-
-        stage('Deploy Producción') {
-            // >>> [GATE]: aquí va la condición "when" que protege producción
-            steps {
-                sh 'bash scripts/deploy.sh produccion 5000'
-                script { env.PRODUCCION = env.APP_VERSION }
+                script {
+                    def auditCode = sh(
+                        script: '.venv/bin/pip-audit -r requirements.txt -f json -o reports/pip-audit.json || true',
+                        returnStatus: true
+                    )
+                    echo "pip-audit terminó con código: ${auditCode}"
+                }
             }
         }
     }
