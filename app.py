@@ -14,6 +14,7 @@ import time
 from flask import Flask, Response, g, jsonify, render_template_string, request
 from werkzeug.security import check_password_hash, generate_password_hash
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from markupsafe import escape
 
 app = Flask(__name__)
 
@@ -133,6 +134,10 @@ def despues_de_la_peticion(respuesta):
     if endpoint != "/metrics":
         HTTP_PETICIONES.labels(request.method, endpoint, str(respuesta.status_code)).inc()
         HTTP_LATENCIA.labels(endpoint).observe(time.perf_counter() - g.get("inicio", time.perf_counter()))
+
+    respuesta.headers["X-Content-Type-Options"] = "nosniff"
+    respuesta.headers["X-Frame-Options"] = "DENY"
+    respuesta.headers["Content-Security-Policy"] = "default-src 'self'"    
     return respuesta
 
 
@@ -152,7 +157,7 @@ def hello():
     @return Página HTML con el saludo.
     """
     name = request.args.get("name", "visitante")
-    return f"<h1>Hola, {name}!</h1>"
+    return f"<h1>Hola, {escape(name)}!</h1>"
 
 
 @app.route("/health")
