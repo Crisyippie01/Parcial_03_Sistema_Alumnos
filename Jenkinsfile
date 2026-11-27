@@ -76,6 +76,33 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Staging') {
+            steps {
+                sh 'bash scripts/deploy.sh staging 5001'
+            }
+        }
+
+        stage('DAST - OWASP ZAP') {
+            steps {
+                sh 'python3 scripts/zap_scan.py http://jenkins:5001'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'reports/zap-*', allowEmptyArchive: true
+                }
+            }
+        }
+    
+    stage('Deploy Producción') {
+            when {
+                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                sh 'bash scripts/deploy.sh produccion 5000'
+                script { env.PRODUCCION = env.APP_VERSION }
+            }
+        }
     }
 
     post {
