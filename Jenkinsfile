@@ -85,7 +85,7 @@ pipeline {
 
         stage('DAST - OWASP ZAP') {
             steps {
-                sh 'python3 scripts/zap_scan.py http://jenkins:5001'
+                sh 'python3 scripts/zap_scan.py http://localhost:5001'
             }
             post {
                 always {
